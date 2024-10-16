@@ -57,11 +57,17 @@ jobs:
         run: zip -r artifacts.zip dist/*
       - name: Create Github Release
         env:
+          PRERELEASE: ${{ needs.get-version.outputs.is-prerelease }}
           VERSION: "${{ needs.get-version.outputs.version }}"
           REPO: "${{ github.repository }}"
           COMMIT: "${{ github.sha }}"
           GH_TOKEN: "${{ github.token }}"
         run: |
-          gh release create --repo $REPO --target $COMMIT $VERSION artifacts.zip
+          echo "${{ changelog }}" > changelog.md
+          if [ "$PRERELEASE" == "true" ]; then
+            gh release create --prerelease --repo $REPO --target $COMMIT -F changelog.md "v$VERSION" artifacts.zip
+          else
+            gh release create --repo $REPO --target $COMMIT -F changelog.md "v$VERSION" artifacts.zip
+          fi
       
 
