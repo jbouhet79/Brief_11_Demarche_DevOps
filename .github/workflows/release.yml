@@ -28,5 +28,10 @@ jobs:
             target: wasm32-unknown-unknown
       - name: Setup Trunk
         uses: jetli/trunk-action@v0.5.0
+      - name: Build with Trunk
+        # variable d'environnement pour que gradle en ait connaissance
+        env: 
+          VERSION: "${{ needs.get-version.outputs.version }}"
+        run: trunk build --release
       
 
