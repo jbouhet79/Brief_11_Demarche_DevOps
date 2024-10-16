@@ -9,6 +9,7 @@ jobs:
     uses: shiipou/github-actions/.github/workflows/get-version.yml@main
     with:
       release-branches: '^(main)$'
+      prerelease-branches: '^(beta)$'
 
   build:
     name: Rust build
