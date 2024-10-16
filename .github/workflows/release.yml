@@ -21,9 +21,12 @@ jobs:
       - uses: actions/checkout@v4
       # Ensure rustfmt is installed and setup problem matcher
       - uses: actions/checkout@v2
-      - name: Install Rust stable
+      - name: Setup Rust stable
         uses: actions-rs/toolchain@v1
         with:
             toolchain: stable
             target: wasm32-unknown-unknown
+      - name: Setup Trunk
+        uses: jetli/trunk-action@v0.5.0
+      
 
