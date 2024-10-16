@@ -25,5 +25,5 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
             toolchain: stable
-            target: add wasm32-unknown-unknown
+            target: wasm32-unknown-unknown
 
