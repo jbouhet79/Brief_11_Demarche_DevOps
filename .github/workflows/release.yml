@@ -33,5 +33,9 @@ jobs:
         env: 
           VERSION: "${{ needs.get-version.outputs.version }}"
         run: trunk build --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spring
+          path: dist/*
       
 
