@@ -76,4 +76,4 @@ It'll use the [<Counter />](src/counter.rs) component inside.
 This repo is shipped with the MIT license.
 
 [trunk]: https://github.com/thedodd/trunk
-11
+
