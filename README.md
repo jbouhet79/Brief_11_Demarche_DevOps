@@ -55,6 +55,7 @@ Unless overwritten, the output will be located in the `dist` directory.
     └── trunk-template-6ffbdd40bd88aaf2_bg.wasm # WASM generation of your Rust React App.
 ```
 
+
 ## Contributing
 
 If you want to contribute, There are a few things you have to look into before everything else.
