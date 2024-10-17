@@ -8,25 +8,27 @@ on:
 # Définir les permissions nécessaires pour ce workflow
 permissions:
   contents: write
+  # accès à d'autres permissions via crtl+espace pour voir les possibilités
 
 jobs:
   # Job pour obtenir la version
   get-version:
-    # Utilise un workflow externe pour obtenir la version
+    # Utilise (importe) un workflow externe pour obtenir la version
+    # github-actions est un repo communautaire
     uses: shiipou/github-actions/.github/workflows/get-version.yml@main
-    with:
+    with: # paramètres à rajouter au workflow générique récupéré
       release-branches: '^(main)$'
       prerelease-branches: '^(beta)$'
 
-
   # Job pour construire le projet Rust
   build:
+    # les names sont les noms visibles dans la release Github
     name: Rust build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # utilise un runner linux (possible aussi Mac, Windows)
     # Condition pour exécuter ce job seulement si une release est détectée
     if: ${{ needs.get-version.outputs.will-release == 'true' }}
     needs:
-      - get-version
+      - get-version # à besoin que le Job get-version soit fini pour commencer le build
     steps:
       # Étape pour vérifier le code source
       - uses: actions/checkout@v4
@@ -37,17 +39,18 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
             toolchain: stable
-            target: wasm32-unknown-unknown
+            target: wasm32-unknown-unknown 
+            # wasm pour que cela soit exécuter dans un navigateur (plus rapide que x86 par exemple)
       # Installer Trunk
       - name: Setup Trunk
-        uses: jetli/trunk-action@v0.5.0
+        uses: jetli/trunk-action@v0.5.0 # version dejà complilée
       # Construire le projet avec Trunk
       - name: Build with Trunk
         # Définir la variable d'environnement pour que Gradle en ait connaissance
         env: 
-          VERSION: "${{ needs.get-version.outputs.version }}"
+          VERSION: "${{ needs.get-version.outputs.version }}" # avec le n° de version récupéré dans outputs.version 
         run: trunk build --release
-      # Télécharger les artefacts de construction
+      # Télécharger les artefacts de construction (upload)
       - uses: actions/upload-artifact@v4
         with:
           name: rust
@@ -63,22 +66,22 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4.1.8
         with:
-          name: rust
-          path: dist/
+          name: rust #nma identique à celui uploader
+          path: dist/ # dossier dans lequel est downloader l'artifact (peut être différent de celui du upload)
       # Compresser les fichiers artefacts
       - name: Zip files artifacts
         run: zip -r artifacts.zip dist/*
       # Créer une release GitHub
       - name: Create Github Release
-        env:
+        env: # définition des varialbles d'environnement utiles pour la suite (plus simples à utliser)
           PRERELEASE: ${{ needs.get-version.outputs.is-prerelease }}
-          CHANGELOG: ${{ needs.get-version.outputs.changelogs }}
+          CHANGELOG: ${{ needs.get-version.outputs.changelogs }} # détail des actions
           VERSION: "${{ needs.get-version.outputs.version }}"
           REPO: "${{ github.repository }}"
-          COMMIT: "${{ github.sha }}"
+          COMMIT: "${{ github.sha }}" # id du dernier commit
           GH_TOKEN: "${{ github.token }}"
         run: |
-          echo "$CHANGELOG" > changelog.md
+          echo "$CHANGELOG" > changelog.md 
           if [ "$PRERELEASE" == "true" ]; then
             gh release create --prerelease --repo $REPO --target $COMMIT -F changelog.md "v$VERSION" artifacts.zip
           else
